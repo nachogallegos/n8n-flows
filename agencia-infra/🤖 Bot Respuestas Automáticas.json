@@ -1,0 +1,177 @@
+{
+  "name": "🤖 Bot Respuestas Automáticas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-bot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        -128
+      ],
+      "id": "e9fc6341-274d-4a7b-9577-69f1af9b82be",
+      "name": "Webhook",
+      "webhookId": "8db2de69-ddfc-461f-8c97-33b643746bc4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a62a1ba-c909-4791-91d5-590a2978ac81",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": "=false",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        -128
+      ],
+      "id": "c4c640b9-b248-463a-81ec-5a6af3eab69e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres el asistente virtual de Alimentos Congelados Premium. Responde preguntas sobre productos y precios de forma amable y breve. Stock: Salmón premium $8.990/kg, Merluza filete $4.500/kg, Camarones jumbo $12.990/kg, Reineta entera $3.990/kg, Albóndigas de vacuno $5.500/kg. Si no sabes algo, di que consultarás con el equipo."
+            },
+            {
+              "content": "={{ $json.body.data.message.conversation }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        -224
+      ],
+      "id": "0cdc39e9-baeb-40c1-a687-7d3c77931e01",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nstY9HtM2BK44Vcp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://agencia-bot-evolution-api.myrubl.easypanel.host/message/sendText/agencia-bot",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "429683C4C977415CAAFCCE10F7D57E11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=number",
+              "value": "={{ $('Webhook').item.json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Message a model').item.json.output[0].content[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        -224
+      ],
+      "id": "f646fbbb-6fa5-43dd-8c6c-b92b3e4ed15d",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e75237b2-e752-4b68-bbce-c5a145d8e928",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "088d4a1e4b208ebd1c2befdc91b7d0d21f3964b8fbaf3aa79430021e7059ac79"
+  },
+  "id": "xKHH2BMqGewxOA3c",
+  "tags": []
+}
